@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Prediksi Suhu Rata-Rata</title>
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+        <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+        <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    </head>    
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Prediksi Suhu Berdasarkan Data Historis Cuaca</h1>
+        
+        <!-- Form untuk upload dataset -->
+        <form action="/upload" method="post" enctype="multipart/form-data" class="mb-4">
+            <div class="mb-3">
+                <label for="file" class="form-label">Unggah Dataset (CSV)</label>
+                <input class="form-control" type="file" name="file" id="file" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Upload</button>
+        </form>
+        
+        {% if table_html %}
+            <h2 class="mt-4">Data dari File CSV</h2>
+            <div class="table-responsive">
+                {{ table_html | safe }}
+            </div>
+        {% endif %}
+        
+        <!-- Form untuk input manual -->
+        <form action="/" method="post" class="mb-4">
+            <div class="row">
+                <div class="col-md-4">
+                    <label class="form-label">Suhu Minimum (°C)</label>
+                    <input type="text" class="form-control" name="suhu_min" value="{{ suhu_min_value }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Suhu Maksimum (°C)</label>
+                    <input type="text" class="form-control" name="suhu_max" value="{{ suhu_max_value }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Suhu Rata-rata (°C)</label>
+                    <input type="text" class="form-control" name="suhu_avg" value="{{ suhu_avg_value }}" required>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col-md-4">
+                    <label class="form-label">Kelembaban (%)</label>
+                    <input type="text" class="form-control" name="kelembaban" value="{{ kelembaban_value }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Curah Hujan (mm)</label>
+                    <input type="text" class="form-control" name="curah_hujan" value="{{ curah_hujan_value }}" required>
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label">Durasi Penyinaran Matahari (jam)</label>
+                    <input type="text" class="form-control" name="durasi_sinar" value="{{ durasi_sinar_value }}" required>
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success mt-3">Prediksi</button>
+        </form>
+        
+        {% if prediction is not none %}
+            <div class="alert alert-info">
+                <h2>Hasil Prediksi: {{ prediction }} °C</h2>
+            </div>
+            
+            <!-- Grafik hasil prediksi -->
+            <canvas id="predictionChart" width="1100" height="400"></canvas>
+            <script>
+                var ctx = document.getElementById('predictionChart').getContext('2d');
+                var chart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Prediksi Suhu'],
+                        datasets: [{
+                            label: 'Suhu (°C)',
+                            data: [{{ prediction }}],
+                            backgroundColor: 'rgba(54, 162, 235, 0.5)'
+                        }]
+                    }
+                });
+            </script>
+        {% endif %}
+    </div>
+</body>
+</html>
